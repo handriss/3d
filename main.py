@@ -1,4 +1,6 @@
 from tkinter import *
+from math import *
+import time
 
 
 class Rect(object):
@@ -6,50 +8,48 @@ class Rect(object):
         self.canvas = canvas
         self.width = width
         self.height = height
-        self.x = 0
-        self.y = 0
-        coord = self.getCoordinates()
-        self.rect = self.canvas.create_rectangle(coord[0], coord[1],
-                                                 coord[2], coord[2],
-                                                 fill="blue")
+        self.x = self.width/2
+        self.y = self.height/2
+        self.canvas.create_oval(self.x, self.y, self.x+5, self.y+5, fill="blue")
 
-    def getCoordinates(self):
-        # Used to define the sides of the rect based on a starting x,y position.
-        left = -self.width/2 + self.x
-        top = -self.height/2 + self.y
-        right = self.width/2 + self.x
-        bottom = self.height/2 + self.y
-        return left, top, bottom, right
+        self.offset_x = 400
+        self.offset_y = 400
 
-    def move(self, x, y):
-        # Move the Rect object to a new location.  What is called to by the
-        # UI callback moveRect()
-        deltaX = x - self.x
-        deltaY = y - self.y
-        self.canvas.move(self.rect, deltaX, deltaY)
-        self.x = x
-        self.y = y
+        node0 = [0, 100]
+        for i in range(360):
+            self.rotate_z(1, node0)
+
+    def rotate_z(self, theta, node):
+        sin_t = sin(radians(theta))
+        cos_t = cos(radians(theta))
+
+        x = node[0]
+        y = node[1]
+
+        node[0] = x * cos_t - y * sin_t
+        node[1] = y * cos_t + x * sin_t
+
+        self.oval = self.canvas.create_oval(
+            self.offset_x+node[0], self.offset_x+node[1], self.offset_x+node[0]+5, self.offset_y+node[1]+5, fill="red"
+        )
+        time.sleep(0.025)
+        self.canvas.update()
+        self.canvas.delete('all')
 
 
 class App(object):
-    def __init__(self, width=256, height=256):
+    def __init__(self, width=800, height=800):
         self.width = width
         self.height = height
         self.root = Tk()
         self.root.title("tkinter_test01")
-        self.root.geometry("%sx%s"%(self.width, self.height))
+        self.root.geometry("{}x{}".format(self.width, self.height))
 
         self.canvas = Canvas(self.root, width=self.width, height=self.height)
-        # Bind the event to move our Rect:
-        self.canvas.bind("<Motion>", self.moveRect)
         self.canvas.pack()
         # Create our Rect object:
-        self.rect = Rect(self.canvas, 32, 32)
+        self.rect = Rect(self.canvas, 800, 800)
         self.root.mainloop()
-
-    def moveRect(self, event):
-        # Callback that will move our Rect object
-        self.rect.move(event.x, event.y)
 
 if __name__ == "__main__":
     App()
