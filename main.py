@@ -3,8 +3,8 @@ from math import *
 import time
 
 
-class Rect(object):
-    def __init__(self, canvas, width, height):
+class Drawer():
+    def __init__(self, canvas):
         self.canvas = canvas
 
         center = [400, 400]
@@ -25,13 +25,16 @@ class Rect(object):
                 nodes[i-1][0]+center[0], nodes[i-1][1]+center[1], fill="black"
             ))
 
-        self.coords = []
         for i in range(360):
             time.sleep(0.025)
 
             for node, vortex in zip(nodes, vertices):
                 shift_x, shift_y = self.rotate_z(1, node)
                 self.canvas.move(vortex, shift_x, shift_y)
+            for index, edge in enumerate(edges):
+                x1, y1, x11, y11 = self.canvas.coords(vertices[index])
+                x2, y2, x22, y22 = self.canvas.coords(vertices[index-1])
+                self.canvas.coords(edge, (x1+x11)/2, (y1+y11)/2, (x2+x22)/2, (y2+y22)/2)
                 self.canvas.update()
 
     def draw_circle(self, x, y, size, **kwargs):
@@ -49,18 +52,17 @@ class Rect(object):
         return -(x_temp - node[0]), -(y_temp - node[1])
 
 
-class App(object):
+class App():
     def __init__(self, width=800, height=800):
         self.width = width
         self.height = height
         self.root = Tk()
-        self.root.title("tkinter_test01")
         self.root.geometry("{}x{}".format(self.width, self.height))
 
         self.canvas = Canvas(self.root, width=self.width, height=self.height)
         self.canvas.pack()
 
-        self.rect = Rect(self.canvas, 800, 800)
+        self.rect = Drawer(self.canvas)
         self.root.mainloop()
 
 if __name__ == "__main__":
